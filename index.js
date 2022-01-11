@@ -21,7 +21,7 @@ const option = {
   followUserMinFollowing: null,
   dontUnfollowUntilTimeElapsed: 3 * 24 * 60 * 60 * 1000,
   excludeUsers: [],
-  dryRun: true
+  dryRun: false
 }
 
 ;(async () => {
