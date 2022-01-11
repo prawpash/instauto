@@ -28,7 +28,7 @@ const option = {
   try{
     const usersToFollowFollowersOf = []
 
-    const readStream = fs.createReadStream('userMustFollow.csv')
+    const readStream = fs.createReadStream('/media/userMustFollow.csv')
       .pipe(csv())
       .on('data', (row) => {
         usersToFollowFollowersOf.push(row.username)
