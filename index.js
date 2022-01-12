@@ -41,7 +41,7 @@ const option = {
       console.log(`>>> ${chunk}`)
     }
 
-    let browser = await puppeteer.launch({ headless:true })
+    let browser = await puppeteer.launch({ headless:true, executablePath: '/usr/bin/chromium-browser' })
 
     const instautoDB = await Instauto.JSONDB({
       followedDbPath: './followed.json',
