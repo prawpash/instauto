@@ -41,7 +41,15 @@ const option = {
       console.log(`>>> ${chunk}`)
     }
 
-    let browser = await puppeteer.launch({ headless:true, executablePath: '/usr/bin/chromium-browser' })
+    let browser = await puppeteer.launch({
+      headless:true,
+      args: [
+        "--disable-gpu",
+        "--disable-dev-shm-usage",
+        "--disable-setuid-sandbox",
+        "--no-sandbox"
+      ]
+    })
 
     const instautoDB = await Instauto.JSONDB({
       followedDbPath: './followed.json',
