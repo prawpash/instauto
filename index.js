@@ -59,7 +59,7 @@ const option = {
 
     const instauto = await Instauto(instautoDB, browser, option)
 
-    const unfollowedCount = await instauto.unfollowOldFollowed({ ageInDays: 14, limit: option.maxFollowsPerDay * (2 / 3) })
+    const unfollowedCount = await instauto.unfollowOldFollowed({ ageInDays: 2, limit: option.maxFollowsPerDay * (2 / 3) })
 
     if (unfollowedCount > 0) await instauto.sleep(10 * 60 * 1000)
 
