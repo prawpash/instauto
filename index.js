@@ -1,7 +1,8 @@
 'use strict'
 
+const config = require('/media/config.json')
 const puppeteer = require('puppeteer')
-const Instauto = require('instauto')
+const Instauto = require('prawira_instauto')
 
 const fs = require('fs')
 const csv = require('csv-parser')
@@ -10,17 +11,17 @@ const option = {
   cookiesPath: './cookies.json',
   username: `${process.env.USERNAMEIG}`,
   password: `${process.env.PASSWORDIG}`,
-  maxFollowsPerHour: 15,
-  maxFollowsPerDay: 100,
-  maxLikesPerDay: 50,
-  followUserRatioMin: 0.2,
-  followUserRatioMax: 4.0,
-  followUserMaxFollowers: null,
-  followUserMaxFollowing: null,
-  followUserMinFollowers: null,
-  followUserMinFollowing: null,
-  dontUnfollowUntilTimeElapsed: 3 * 24 * 60 * 60 * 1000,
-  excludeUsers: [],
+  maxFollowsPerHour: config.maxFollowsPerHour,
+  maxFollowsPerDay: config.maxFollowsPerDay,
+  maxLikesPerDay: config.maxLikesPerDay,
+  followUserRatioMin: config.followUserRatioMin,
+  followUserRatioMax: config.followUserRatioMax,
+  followUserMaxFollowers: config.followUserMaxFollowers,
+  followUserMaxFollowing: config.followUserMaxFollowing,
+  followUserMinFollowers: config.followUserMinFollowers,
+  followUserMinFollowing: config.followUserMinFollowing,
+  dontUnfollowUntilTimeElapsed: config.dontUnfollowUntilTimeElapsed,
+  excludeUsers: config.excludeUsers,
   dryRun: false
 }
 
@@ -42,7 +43,7 @@ const option = {
     }
 
     let browser = await puppeteer.launch({
-      headless:true,
+      headless: true,
       args: [
         "--disable-gpu",
         "--disable-dev-shm-usage",
@@ -66,10 +67,10 @@ const option = {
     await instauto.followUsersFollowers({
       usersToFollowFollowersOf,
       maxFollowsTotal: option.maxFollowsPerDay - unfollowedCount,
-      skipPrivate: true,
-      enableLikeImages: true,
-      likeImagesMax: 2,
-      enableCommentContents: true
+      skipPrivate: config.skipPrivate,
+      enableLikeImages: config.enableLikeImages,
+      likeImagesMax: config.likeImagesMax,
+      enableCommentContents: config.enableCommentContents
     })
 
     await instauto.sleep(10 * 60 * 1000)
