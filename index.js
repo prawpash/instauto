@@ -459,61 +459,67 @@ const Instauto = async (db, browser, options) => {
       return;
     }
 
-    for (const image of images) {
-      image.click();
+    try{
+      for (const image of images) {
+        image.click();
 
-      await window.instautoSleep(3000);
+        await window.instautoSleep(3000);
 
-      const dialog = document.querySelector('*[role=dialog]');
+        const dialog = document.querySelector('*[role=dialog]');
 
-      if (!dialog) throw new Error('Dialog not found');
+        if (!dialog) throw new Error('Dialog not found');
 
-      const section = Array.from(dialog.querySelectorAll('section')).find(s => s.querySelectorAll('*[aria-label="Like"]')[0] && s.querySelectorAll('*[aria-label="Comment"]')[0]);
+        const section = Array.from(dialog.querySelectorAll('section')).find(s => s.querySelectorAll('*[aria-label="Like"]')[0] && s.querySelectorAll('*[aria-label="Comment"]')[0]);
 
-      if (!section) throw new Error('Like button section not found');
+        if (!section) {
+          continue;
+        }
 
-      const likeButtonChild = section.querySelectorAll('*[aria-label="Like"]')[0];
+        const likeButtonChild = section.querySelectorAll('*[aria-label="Like"]')[0];
 
-      if (!likeButtonChild) throw new Error('Like button not found (aria-label)');
+        if (!likeButtonChild) throw new Error('Like button not found (aria-label)');
 
-      // eslint-disable-next-line no-inner-declarations
-      function findClickableParent(el) {
-        let elAt = el;
-        while (elAt) {
-          if (elAt.click) {
-            return elAt;
+        // eslint-disable-next-line no-inner-declarations
+        function findClickableParent(el) {
+          let elAt = el;
+          while (elAt) {
+            if (elAt.click) {
+              return elAt;
+            }
+            elAt = elAt.parentElement;
           }
-          elAt = elAt.parentElement;
-        }
-        return undefined;
-      }
-
-      const foundClickable = findClickableParent(likeButtonChild);
-
-      if (!foundClickable) throw new Error('Like button not found');
-
-      if (!dryRunIn) {
-        foundClickable.click();
-        if (enableCommentContents) {
-          await comment();
+          return undefined;
         }
 
-        window.instautoOnImageLiked(image.href);
+        const foundClickable = findClickableParent(likeButtonChild);
+
+        if (!foundClickable) throw new Error('Like button not found');
+
+        if (!dryRunIn) {
+          foundClickable.click();
+          if (enableCommentContents) {
+            await comment();
+          }
+
+          window.instautoOnImageLiked(image.href);
+        }
+
+        await window.instautoSleep(3000);
+
+        const closeButtonChild = document.querySelector('button [aria-label=Close]');
+
+        if (!closeButtonChild) throw new Error('Close button not found (aria-label)');
+
+        const closeButton = findClickableParent(closeButtonChild);
+
+        if (!closeButton) throw new Error('Close button not found');
+
+        closeButton.click();
+
+        await window.instautoSleep(5000);
       }
-
-      await window.instautoSleep(3000);
-
-      const closeButtonChild = document.querySelector('button [aria-label=Close]');
-
-      if (!closeButtonChild) throw new Error('Close button not found (aria-label)');
-
-      const closeButton = findClickableParent(closeButtonChild);
-
-      if (!closeButton) throw new Error('Close button not found');
-
-      closeButton.click();
-
-      await window.instautoSleep(5000);
+    } catch(error) {
+      console.log(error);
     }
 
     instautoLog('Done liking images');
