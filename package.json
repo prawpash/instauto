@@ -1,14 +1,14 @@
 {
-  "name": "instauto",
+  "name": "prawira_instauto",
   "version": "7.2.0",
-  "description": "Instagram automation library written in Node.js",
+  "description": "I updated the base application to make some function i need",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
     "test": "exit 0"
   },
-  "author": "Mikael Finstad <finstaden@gmail.com>",
-  "repository": "mifi/instauto",
+  "author": "Prawira <robbyprawira3@gmail.com>",
+  "repository": "prawpash/instauto",
   "license": "MIT",
   "engines": {
     "node": ">=8"
@@ -22,6 +22,6 @@
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.9.0",
-    "puppeteer": "^1.19.0"
+    "puppeteer": "^13.0.1"
   }
 }
