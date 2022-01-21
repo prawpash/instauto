@@ -549,7 +549,7 @@ const Instauto = async (db, browser, options) => {
     enableLikeImages,
     likeImagesMin,
     likeImagesMax,
-    enableCommentContents = false,
+    enableCommentContents,
   } = {}) {
     logger.log(`Following up to ${maxFollowsPerUser} followers of ${username}`);
 
@@ -630,7 +630,15 @@ const Instauto = async (db, browser, options) => {
     }
   }
 
-  async function followUsersFollowers({ usersToFollowFollowersOf, maxFollowsTotal = 150, skipPrivate, enableLikeImages = false, likeImagesMin = 1, likeImagesMax = 2 }) {
+  async function followUsersFollowers({
+    usersToFollowFollowersOf,
+    maxFollowsTotal = 150,
+    skipPrivate,
+    enableLikeImages = false,
+    likeImagesMin = 1,
+    likeImagesMax = 2,
+    enableCommentContents = false
+  }) {
     if (!maxFollowsTotal || maxFollowsTotal <= 2) {
       throw new Error(`Invalid parameter maxFollowsTotal ${maxFollowsTotal}`);
     }
@@ -644,7 +652,17 @@ const Instauto = async (db, browser, options) => {
 
     for (const username of usersToFollowFollowersOfSliced) {
       try {
-        await followUserFollowers(username, { maxFollowsPerUser, skipPrivate, enableLikeImages, likeImagesMin, likeImagesMax });
+        await followUserFollowers(
+          username,
+          {
+            maxFollowsPerUser,
+            skipPrivate,
+            enableLikeImages,
+            likeImagesMin,
+            likeImagesMax,
+            enableCommentContents
+          }
+        );
 
         await sleep(10 * 60 * 1000);
         await throttle();
