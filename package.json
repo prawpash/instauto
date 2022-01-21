@@ -1,7 +1,10 @@
 {
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
     "csv-parser": "^3.0.0",
-    "prawira_instauto": "^7.3.0",
+    "prawira_instauto": "^7.3.1",
     "puppeteer": "^13.0.1"
   }
 }
