@@ -2,7 +2,7 @@
 
 const puppeteer = require('puppeteer'); // eslint-disable-line import/no-extraneous-dependencies
 
-const Instauto = require('instauto'); // eslint-disable-line import/no-unresolved
+const Instauto = require('./index'); // eslint-disable-line import/no-unresolved
 
 const options = {
   cookiesPath: './cookies.json',
@@ -65,8 +65,8 @@ const options = {
     // This can be used to unfollow people:
     // Will unfollow auto-followed AND manually followed accounts who are not following us back, after some time has passed
     // The time is specified by config option dontUnfollowUntilTimeElapsed
-    // await instauto.unfollowNonMutualFollowers();
-    // await instauto.sleep(10 * 60 * 1000);
+    await instauto.unfollowNonMutualFollowers();
+    await instauto.sleep(10 * 60 * 1000);
 
     // Unfollow previously auto-followed users (regardless of whether or not they are following us back)
     // after a certain amount of days (2 weeks)
@@ -76,7 +76,7 @@ const options = {
     if (unfollowedCount > 0) await instauto.sleep(10 * 60 * 1000);
 
     // List of usernames that we should follow the followers of, can be celebrities etc.
-    const usersToFollowFollowersOf = ['lostleblanc', 'sam_kolder'];
+    const usersToFollowFollowersOf = ['mubitive', 'sekolahkoding'];
 
     // Now go through each of these and follow a certain amount of their followers
     await instauto.followUsersFollowers({
@@ -85,6 +85,7 @@ const options = {
       skipPrivate: true,
       enableLikeImages: true,
       likeImagesMax: 3,
+      enableCommentContents: true
     });
 
     await instauto.sleep(10 * 60 * 1000);
