@@ -934,7 +934,7 @@ const Instauto = async (db, browser, options) => {
 
         if (data) {
           const input = await page.$x('//textarea[@aria-label="Add a comment…"]');
-          await input[0].type(`${comment[randomComment]}`, { delay: 50 });
+          await input[0].type(`${comment[randomComment - 1]}`, { delay: 50 });
           if (!dryRun) {
             await page.keyboard.press('Enter');
           }
