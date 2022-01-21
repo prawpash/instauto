@@ -68,7 +68,8 @@ const option = {
       maxFollowsTotal: option.maxFollowsPerDay - unfollowedCount,
       skipPrivate: true,
       enableLikeImages: true,
-      likeImagesMax: 2
+      likeImagesMax: 2,
+      enableCommentContents: true
     })
 
     await instauto.sleep(10 * 60 * 1000)
