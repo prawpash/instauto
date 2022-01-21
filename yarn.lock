@@ -218,15 +218,6 @@ inherits@2, inherits@^2.0.3, inherits@^2.0.4:
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
 
-instauto@^7.2.0:
-  version "7.2.0"
-  resolved "https://registry.yarnpkg.com/instauto/-/instauto-7.2.0.tgz#d682b930edf71c6b07a094bb481df632ac2eddc1"
-  integrity sha512-ieOjl0QNoCyXhVQL667NkhHRvRAP27sb2cz5CclGYTniL7X/+NzdrDb+UxXPh+8NiBcVPzUw7bLSiEldpYLmNg==
-  dependencies:
-    fs-extra "^5.0.0"
-    lodash "^4.17.10"
-    user-agents "^1.0.559"
-
 jsonfile@^4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/jsonfile/-/jsonfile-4.0.0.tgz#8771aae0799b64076b76640fca058f9c10e33ecb"
@@ -327,6 +318,15 @@ pkg-dir@4.2.0:
   integrity sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ==
   dependencies:
     find-up "^4.0.0"
+
+prawira_instauto@^7.3.0:
+  version "7.3.0"
+  resolved "https://registry.yarnpkg.com/prawira_instauto/-/prawira_instauto-7.3.0.tgz#e6603f747c2bfd0ab380c2adb91c692f83ecda39"
+  integrity sha512-gu6lQqV4vj+PPchjBvkdYkhFu0D/ARxJPCi1BcXHnAcvoIxjnV0oSo28JPFp9YKLzFytwzznNed6ZYCKH0GWnA==
+  dependencies:
+    fs-extra "^5.0.0"
+    lodash "^4.17.10"
+    user-agents "^1.0.559"
 
 progress@2.0.3:
   version "2.0.3"
@@ -449,9 +449,9 @@ universalify@^0.1.0:
   integrity sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==
 
 user-agents@^1.0.559:
-  version "1.0.892"
-  resolved "https://registry.yarnpkg.com/user-agents/-/user-agents-1.0.892.tgz#8b8d52028d9f597c677d470959cbb49a879331fe"
-  integrity sha512-0NOOAIrSB8T8tfrzp7iXpQhpvueOWp/3n4w/CA38yUoXz0VovWsBii7cIAIHRwXxXunAHYBgeFj7wmY0fp2IOA==
+  version "1.0.902"
+  resolved "https://registry.yarnpkg.com/user-agents/-/user-agents-1.0.902.tgz#5b16cd4e64c658029e50baf683b173a338560529"
+  integrity sha512-AUn+ArF2x/N3k5l2wW0A4DCAEJYlCQkognsFoaNH10X9wo/AMYAYe7ElEOueOLgUaVYW0mBoWyj5rlfOIHcCHw==
   dependencies:
     dot-json "^1.2.2"
     lodash.clonedeep "^4.5.0"
