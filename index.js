@@ -431,7 +431,8 @@ const Instauto = async (db, browser, options) => {
     dryRun: dryRunIn,
     likeImagesMin,
     likeImagesMax,
-    enableCommentContents
+    enableCommentContents,
+    comments
   }) {
     const allImages = Array.from(document.getElementsByTagName('a'))
       .filter(el => /instagram.com\/p\//.test(el.href));
@@ -498,7 +499,7 @@ const Instauto = async (db, browser, options) => {
         if (!dryRunIn) {
           foundClickable.click();
           if (enableCommentContents) {
-            await comment();
+            await comment(comments);
           }
 
           window.instautoOnImageLiked(image.href);
@@ -527,7 +528,7 @@ const Instauto = async (db, browser, options) => {
   /* eslint-enable no-undef */
 
 
-  async function likeCurrentUserImages({ username, likeImagesMin, likeImagesMax, enableCommentContents } = {}) {
+  async function likeCurrentUserImages({ username, likeImagesMin, likeImagesMax, enableCommentContents, comments } = {}) {
     if (!likeImagesMin || !likeImagesMax || likeImagesMax < likeImagesMin || likeImagesMin < 1) throw new Error('Invalid arguments');
 
     logger.log(`Liking ${likeImagesMin}-${likeImagesMax} user images`);
@@ -535,12 +536,12 @@ const Instauto = async (db, browser, options) => {
       await page.exposeFunction('instautoSleep', sleep);
       await page.exposeFunction('instautoLog', (...args) => console.log(...args));
       await page.exposeFunction('instautoOnImageLiked', (href) => onImageLiked({ username, href }));
-      await page.exposeFunction('comment', async() => await commentThisContent());
+      await page.exposeFunction('comment', async(...args) => await commentThisContent(...args));
     } catch (err) {
       // Ignore already exists error
     }
 
-    await page.evaluate(likeCurrentUserImagesPageCode,{ dryRun, likeImagesMin, likeImagesMax, enableCommentContents });
+    await page.evaluate(likeCurrentUserImagesPageCode,{ dryRun, likeImagesMin, likeImagesMax, enableCommentContents, comments });
   }
 
   async function followUserFollowers(username, {
@@ -550,6 +551,7 @@ const Instauto = async (db, browser, options) => {
     likeImagesMin,
     likeImagesMax,
     enableCommentContents,
+    comments
   } = {}) {
     logger.log(`Following up to ${maxFollowsPerUser} followers of ${username}`);
 
@@ -613,7 +615,7 @@ const Instauto = async (db, browser, options) => {
 
           if (!isPrivate && enableLikeImages && !hasReachedDailyLikesLimit()) {
             try {
-              await likeCurrentUserImages({ username: follower, likeImagesMin, likeImagesMax, enableCommentContents });
+              await likeCurrentUserImages({ username: follower, likeImagesMin, likeImagesMax, enableCommentContents, comments });
             } catch (err) {
               logger.error(`Failed to follow user's images ${follower}`, err);
               await takeScreenshot();
@@ -637,7 +639,8 @@ const Instauto = async (db, browser, options) => {
     enableLikeImages = false,
     likeImagesMin = 1,
     likeImagesMax = 2,
-    enableCommentContents = false
+    enableCommentContents = false,
+    comments
   }) {
     if (!maxFollowsTotal || maxFollowsTotal <= 2) {
       throw new Error(`Invalid parameter maxFollowsTotal ${maxFollowsTotal}`);
@@ -660,7 +663,8 @@ const Instauto = async (db, browser, options) => {
             enableLikeImages,
             likeImagesMin,
             likeImagesMax,
-            enableCommentContents
+            enableCommentContents,
+            comments
           }
         );
 
@@ -890,21 +894,28 @@ const Instauto = async (db, browser, options) => {
       await page.exposeFunction('instautoSleep', sleep);
       await page.exposeFunction('instautoLog', (...args) => console.log(...args));
       await page.exposeFunction('instautoOnImageLiked', (href) => onImageLiked({ username, href }));
-      await page.exposeFunction('comment', async() => await commentThisContent());
+      await page.exposeFunction('comment', async(...args) => await commentThisContent(...args));
 
       let dryRun = false;
       let likeImagesMin = 2;
       let likeImagesMax = 4;
       let enableCommentContents = true;
+      let comments = [
+        "🍉🍉🍉",
+        "🍈🍈",
+        "☕"
+      ]
 
-      await page.evaluate(likeCurrentUserImagesPageCode,{ dryRun, likeImagesMin, likeImagesMax, enableCommentContents });
+      await page.evaluate(likeCurrentUserImagesPageCode,{ dryRun, likeImagesMin, likeImagesMax, enableCommentContents, comments });
     } catch (err) {
       console.log(err);
     }
   }
 
-  async function commentThisContent(){
-    const comment = ["👍👍👍👍👍👍👍", "💪💪💪💪💪💪💪", "🔥🔥🔥🔥🔥🔥🔥"];
+  async function commentThisContent(comment = []){
+    if (comment.length == 0) {
+      comment = ["👍", "💪💪💪", "🔥🔥🔥"];
+    }
     const randomComment = Math.floor(Math.random() * (comment.length - 1 + 1)) + 1
     let data;
 
@@ -935,6 +946,7 @@ const Instauto = async (db, browser, options) => {
         if (data) {
           const input = await page.$x('//textarea[@aria-label="Add a comment…"]');
           await input[0].type(`${comment[randomComment - 1]}`, { delay: 50 });
+          await sleep(1000);
           if (!dryRun) {
             await page.keyboard.press('Enter');
           }
