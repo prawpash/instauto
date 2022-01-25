@@ -1,0 +1,18 @@
+{
+  "maxFollowsPerHour": 15,
+  "maxFollowsPerDay": 100,
+  "maxLikesPerDay": 50,
+  "followUserRatioMin": 0.2,
+  "followUserRatioMax": 4.0,
+  "followUserMaxFollowers": null,
+  "followUserMaxFollowing": null,
+  "followUserMinFollowers": null,
+  "followUserMinFollowing": null,
+  "dontUnfollowUntilTimeElapsed": 3259200000,
+  "excludeUsers": [],
+  "skipPrivate": true,
+  "enableLikeImages": true,
+  "likeImagesMax": 2,
+  "enableCommentContents": true,
+  "ageInDays": 2
+}
