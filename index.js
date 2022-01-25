@@ -11,7 +11,7 @@ const userMustFollow = '/media/userMustFollow.csv'
 //const userMustFollow = './userMustFollow.csv'
 
 // Production
-const commentData = '/media/comments.csv'
+const commentsData = '/media/comments.csv'
 // Development
 //const commentsData = './comments.csv'
 
