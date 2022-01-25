@@ -1,6 +1,20 @@
 'use strict'
 
+// Production
 const config = require('/media/config.json')
+// Development
+//const config = require('./config.json')
+
+// Production
+const userMustFollow = '/media/userMustFollow.csv'
+// Development
+//const userMustFollow = './userMustFollow.csv'
+
+// Production
+const commentData = '/media/comments.csv'
+// Development
+//const commentsData = './comments.csv'
+
 const puppeteer = require('puppeteer')
 const Instauto = require('prawira_instauto')
 
@@ -28,17 +42,31 @@ const option = {
 ;(async () => {
   try{
     const usersToFollowFollowersOf = []
+    const comments = []
 
-    const readStream = fs.createReadStream('/media/userMustFollow.csv')
+    const readStream = fs.createReadStream(userMustFollow)
       .pipe(csv())
       .on('data', (row) => {
         usersToFollowFollowersOf.push(row.username)
       })
       .on('end', () => {
-        console.log('CSV End')
+        console.log("Get Data User From CSV Complete")
       })
 
     for await (const chunk of readStream){
+      console.log(`>>> ${chunk}`)
+    }
+
+    const commentReadStream = fs.createReadStream(commentsData)
+      .pipe(csv())
+      .on('data', (row) => {
+        comments.push(row.comments)
+      })
+      .on('end', () => {
+        console.log("Get Data Comment From CSV Complete")
+      })
+
+    for await (const chunk of commentReadStream){
       console.log(`>>> ${chunk}`)
     }
 
@@ -60,7 +88,10 @@ const option = {
 
     const instauto = await Instauto(instautoDB, browser, option)
 
-    const unfollowedCount = await instauto.unfollowOldFollowed({ ageInDays: 2, limit: option.maxFollowsPerDay * (2 / 3) })
+    const unfollowedCount = await instauto.unfollowOldFollowed({
+      ageInDays: config.ageInDays,
+      limit: option.maxFollowsPerDay * (2 / 3)
+    })
 
     if (unfollowedCount > 0) await instauto.sleep(10 * 60 * 1000)
 
@@ -70,7 +101,8 @@ const option = {
       skipPrivate: config.skipPrivate,
       enableLikeImages: config.enableLikeImages,
       likeImagesMax: config.likeImagesMax,
-      enableCommentContents: config.enableCommentContents
+      enableCommentContents: config.enableCommentContents,
+      comments: comments
     })
 
     await instauto.sleep(10 * 60 * 1000)
