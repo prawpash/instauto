@@ -5,8 +5,8 @@ commentsFilePath="/media/comments.csv"
 
 [ ! -f "${configFilePath}" ] && cp "./config.json" "${configFilePath}"
 
-[ ! -f $userMustFollowPath ] && echo "username" >> userMustFollow.csv
+[ ! -f $userMustFollowPath ] && echo "username" >> $userMustFollowPath
 
-[ ! -f $commentsFilePath ] && echo "comments" >> comments.csv
+[ ! -f $commentsFilePath ] && echo "comments" >> $commentsFilePath
 
 yarn start
