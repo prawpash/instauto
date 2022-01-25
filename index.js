@@ -70,7 +70,7 @@ const option = {
       console.log(`>>> ${chunk}`)
     }
 
-    let browser = await puppeteer.launch({
+    var browser = await puppeteer.launch({
       headless: true,
       args: [
         "--disable-gpu",
