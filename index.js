@@ -957,6 +957,71 @@ const Instauto = async (db, browser, options) => {
     }
 
   }
+
+  async function followUsersFromCSV(accounts, {
+    maxFollowsPerUser = 5,
+    skipPrivate = false,
+    enableLikeImages = false,
+    likeImagesMin = 1,
+    likeImagesMax = 2,
+    enableCommentContents = false,
+    comments = []
+  } = {}) {
+    await throttle();
+
+    // Check if we have more than enough users that are not previously followed
+    const shouldProceed = usersSoFar => (
+      usersSoFar.filter(u => !getPrevFollowedUser(u))
+        .length < maxFollowsPerUser + 5 // 5 is just a margin
+    );
+
+    for (const follower of accounts) {
+      try {
+        const graphqlUser = await navigateToUserAndGetData(follower);
+
+        const followedByCount = graphqlUser.edge_followed_by.count;
+        const followsCount = graphqlUser.edge_follow.count;
+        const isPrivate = graphqlUser.is_private;
+
+        const ratio = followedByCount / (followsCount || 1);
+
+        if (isPrivate && skipPrivate) {
+          logger.log('User is private, skipping');
+        } else if (
+          (followUserMaxFollowers != null && followedByCount > followUserMaxFollowers) ||
+          (followUserMaxFollowing != null && followsCount > followUserMaxFollowing) ||
+          (followUserMinFollowers != null && followedByCount < followUserMinFollowers) ||
+          (followUserMinFollowing != null && followsCount < followUserMinFollowing)
+        ) {
+          logger.log('User has too many or too few followers or following, skipping.', 'followedByCount:', followedByCount, 'followsCount:', followsCount);
+        } else if (
+          (followUserRatioMax != null && ratio > followUserRatioMax) ||
+          (followUserRatioMin != null && ratio < followUserRatioMin)
+        ) {
+          logger.log('User has too many followers compared to follows or opposite, skipping');
+        } else {
+          await followCurrentUser(follower);
+
+          await sleep(10000);
+
+          if (!isPrivate && enableLikeImages && !hasReachedDailyLikesLimit()) {
+            try {
+              await likeCurrentUserImages({ username: follower, likeImagesMin, likeImagesMax, enableCommentContents, comments });
+            } catch (err) {
+              logger.error(`Failed to follow user's images ${follower}`, err);
+              await takeScreenshot();
+            }
+          }
+
+          await sleep(20000);
+          await throttle();
+        }
+      } catch (err) {
+        logger.error(`Failed to process follower ${follower}`, err);
+        await sleep(20000);
+      }
+    }
+  }
   // End Code From Prawira
 
   await setEnglishLang();
@@ -1043,7 +1108,8 @@ const Instauto = async (db, browser, options) => {
     safelyUnfollowUserList,
     getPage,
     followUsersFollowers,
-    experimental
+    experimental,
+    followUsersFromCSV
   };
 };
 
