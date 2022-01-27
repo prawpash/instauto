@@ -11,6 +11,11 @@ const userMustFollow = '/media/userMustFollow.csv'
 //const userMustFollow = './userMustFollow.csv'
 
 // Production
+const userNeedToFollowsPath = '/media/userNeedToFollows.csv'
+// Development
+//const userNeedToFollowsPath = './userNeedToFollows.csv'
+
+// Production
 const commentsData = '/media/comments.csv'
 // Development
 //const commentsData = './comments.csv'
@@ -43,6 +48,7 @@ const option = {
   try{
     const usersToFollowFollowersOf = []
     const comments = []
+    const userNeedToFollows = []
 
     const readStream = fs.createReadStream(userMustFollow)
       .pipe(csv())
@@ -70,6 +76,22 @@ const option = {
       console.log(`>>> ${chunk}`)
     }
 
+    if (config.followUsersDirectlyFromCSV) {
+      const userReadStream = fs.createReadStream(userNeedToFollowsPath)
+        .pipe(csv())
+        .on('data', (row) => {
+          console.log(row)
+          userNeedToFollows.push(row.username)
+        })
+        .on('end', () => {
+          console.log("Get Data User From CSV Complete")
+        })
+
+      for await (const chunk of userReadStream) {
+        console.log(`>>> ${chunk}`)
+      }
+    }
+
     var browser = await puppeteer.launch({
       headless: true,
       args: [
@@ -95,15 +117,25 @@ const option = {
 
     if (unfollowedCount > 0) await instauto.sleep(10 * 60 * 1000)
 
-    await instauto.followUsersFollowers({
-      usersToFollowFollowersOf,
-      maxFollowsTotal: option.maxFollowsPerDay - unfollowedCount,
-      skipPrivate: config.skipPrivate,
-      enableLikeImages: config.enableLikeImages,
-      likeImagesMax: config.likeImagesMax,
-      enableCommentContents: config.enableCommentContents,
-      comments: comments
-    })
+    if (config.followUsersDirectlyFromCSV) {
+      await instauto.followUsersFromCSV(userNeedToFollows, {
+        skipPrivate: config.skipPrivate,
+        enableLikeImages: config.enableLikeImages,
+        likeImagesMax: config.likeImagesMax,
+        enableCommentContents: config.enableCommentContents,
+        comments: comments
+      })
+    } else {
+      await instauto.followUsersFollowers({
+        usersToFollowFollowersOf,
+        maxFollowsTotal: option.maxFollowsPerDay - unfollowedCount,
+        skipPrivate: config.skipPrivate,
+        enableLikeImages: config.enableLikeImages,
+        likeImagesMax: config.likeImagesMax,
+        enableCommentContents: config.enableCommentContents,
+        comments: comments
+      })
+    }
 
     await instauto.sleep(10 * 60 * 1000)
 
