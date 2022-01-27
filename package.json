@@ -4,7 +4,7 @@
   },
   "dependencies": {
     "csv-parser": "^3.0.0",
-    "prawira_instauto": "^7.3.5",
+    "prawira_instauto": "^7.3.6",
     "puppeteer": "^13.0.1"
   }
 }
