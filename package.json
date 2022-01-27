@@ -1,6 +1,6 @@
 {
   "name": "prawira_instauto",
-  "version": "7.3.5",
+  "version": "7.3.6",
   "description": "I updated the base application to make some function i need",
   "main": "index.js",
   "scripts": {
