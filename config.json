@@ -1,6 +1,6 @@
 {
-  "maxFollowsPerHour": 15,
-  "maxFollowsPerDay": 100,
+  "maxFollowsPerHour": 20,
+  "maxFollowsPerDay": 150,
   "maxLikesPerDay": 50,
   "followUserRatioMin": 0.2,
   "followUserRatioMax": 4.0,
@@ -14,5 +14,6 @@
   "enableLikeImages": true,
   "likeImagesMax": 2,
   "enableCommentContents": true,
-  "ageInDays": 2
+  "ageInDays": 2,
+  "followUsersDirectlyFromCSV": false
 }
