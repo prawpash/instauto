@@ -1022,6 +1022,109 @@ const Instauto = async (db, browser, options) => {
       }
     }
   }
+
+  async function postImage(imagePath, ratio, caption){
+    const oriButton = '//div[@role="dialog"]//button//' +
+      '*[contains(text(), "riginal")]//..//..//..'
+
+    const $1x1Button = '//div[@role="dialog"]//button//' +
+      '*[contains(text(), "1")]//..//..//..'
+
+    const $4x5Button = '//div[@role="dialog"]//button//' +
+      '*[contains(text(), "4")]//..//..//..'
+
+    const $16x9Button = '//div[@role="dialog"]//button//' +
+      '*[contains(text(), "16")]//..//..//..'
+
+    await safeGoto('https://instagram.com/')
+    await sleep(3000)
+
+    const postButton = await page.$x('//nav//button')
+
+    if (!(postButton.length > 0)) {
+      logger.error('Post Button Not Found')
+      await sleep(3000)
+      return
+    }
+
+    await postButton[0].click()
+    await sleep(1000)
+
+    const dialogPost = await page.$x('//div[@role="dialog"]')
+
+    if (!(dialogPost.length > 0)) {
+      logger.error('Dialog Not Found')
+      await sleep(3000)
+      return
+    }
+
+    await sleep(2000)
+
+    const [fileChooser] = await Promise.all([
+      page.waitForFileChooser(),
+      page.click('div[role=dialog] button')
+    ])
+
+    await fileChooser.accept([imagePath])
+    await sleep(3000)
+
+    const dialogButton = await page.$x('//div[@role="dialog"]//button')
+    await dialogButton[2].click()
+
+    await sleep(2000)
+
+    switch(ratio){
+      case 1:
+        {
+         const button = await page.$x($1x1Button)
+         await button[0].click()
+        }
+        break
+      case 2:
+        {
+         const button = await page.$x($4x5Button)
+         await button[0].click()
+        }
+        break
+      case 3:
+        {
+         const button = await page.$x($16x9Button)
+         await button[0].click()
+        }
+        break
+      default:
+        {
+         const button = await page.$x(oriButton)
+         await button[0].click()
+        }
+    }
+
+    await sleep(1000)
+
+    await dialogButton[2].click()
+
+    await dialogButton[1].click()
+
+    await sleep(1000)
+
+    const nextButton = await page.$x('//div[@role="dialog"]' +
+      '//button[contains(text(), "ext")]')
+    await nextButton[0].click()
+
+    await sleep(3000)
+
+    const captionArea = await page.$x('//textarea' +
+      '[contains(@aria-label, "caption")]')
+    await captionArea[0].type(caption, { delay: 70 })
+
+    await sleep(2000)
+
+    const shareButton = await page.$x('//div[@role="dialog"]' +
+      '//button[contains(text(), "hare")]')
+
+    await shareButton[0].click()
+
+  }
   // End Code From Prawira
 
   await setEnglishLang();
@@ -1109,7 +1212,8 @@ const Instauto = async (db, browser, options) => {
     getPage,
     followUsersFollowers,
     experimental,
-    followUsersFromCSV
+    followUsersFromCSV,
+    postImage
   };
 };
 
