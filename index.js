@@ -1023,7 +1023,7 @@ const Instauto = async (db, browser, options) => {
     }
   }
 
-  async function postImage(imagePath, ratio, caption){
+  async function postContent(imagePath, ratio, caption){
     const oriButton = '//div[@role="dialog"]//button//' +
       '*[contains(text(), "riginal")]//..//..//..'
 
