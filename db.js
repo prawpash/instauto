@@ -7,18 +7,20 @@ module.exports = async ({
   followedDbPath,
   unfollowedDbPath,
   likedPhotosDbPath,
-
+  taskScheduleDbPath,
   logger = console,
 }) => {
   let prevFollowedUsers = {};
   let prevUnfollowedUsers = {};
   let prevLikedPhotos = [];
+  let nextSchedule = {};
 
   async function trySaveDb() {
     try {
       await fs.writeFile(followedDbPath, JSON.stringify(Object.values(prevFollowedUsers)));
       await fs.writeFile(unfollowedDbPath, JSON.stringify(Object.values(prevUnfollowedUsers)));
       await fs.writeFile(likedPhotosDbPath, JSON.stringify(prevLikedPhotos));
+      await fs.writeFile(taskScheduleDbPath, JSON.stringify(nextSchedule));
     } catch (err) {
       logger.error('Failed to save database');
     }
@@ -40,6 +42,37 @@ module.exports = async ({
     } catch (err) {
       logger.warn('No likes database found');
     }
+    try{
+      nextSchedule = JSON.parse(await fs.readFile(taskScheduleDbPath))
+    } catch (err) {
+      logger.warn('No schedules database found')
+    }
+  }
+
+  function getNextSchedule() {
+    return nextSchedule;
+  }
+
+  async function changeNextSchedule({
+    id,
+    schedule_name = "",
+    time,
+    content_media,
+    content_caption,
+    isPosted = 0
+  }) {
+    nextSchedule = {}
+    if(schedule_name != ""){
+      nextSchedule = {
+        "id": id,
+        "schedule_name": schedule_name,
+        "time":time,
+        "content_media":content_media,
+        "content_caption":content_caption,
+        "isPosted":isPosted
+      }
+    }
+    await trySaveDb();
   }
 
   function getPrevLikedPhotos() {
@@ -118,5 +151,7 @@ module.exports = async ({
     getTotalFollowedUsers,
     getTotalUnfollowedUsers,
     getTotalLikedPhotos,
+    getNextSchedule,
+    changeNextSchedule,
   };
 };
