@@ -1213,7 +1213,7 @@ const Instauto = async (db, browser, options) => {
     followUsersFollowers,
     experimental,
     followUsersFromCSV,
-    postImage
+    postContent,
   };
 };
 
