@@ -67,6 +67,7 @@ const Instauto = async (db, browser, options) => {
   const {
     addPrevFollowedUser, getPrevFollowedUser, addPrevUnfollowedUser, getLikedPhotosLastTimeUnit,
     getPrevUnfollowedUsers, getPrevFollowedUsers, addLikedPhoto,
+    getNextSchedule, changeNextSchedule
   } = db;
 
   const getNumLikesThisTimeUnit = (time) => getLikedPhotosLastTimeUnit(time).length;
@@ -1024,106 +1025,268 @@ const Instauto = async (db, browser, options) => {
   }
 
   async function postContent(imagePath, ratio, caption){
-    const oriButton = '//div[@role="dialog"]//button//' +
-      '*[contains(text(), "riginal")]//..//..//..'
+    try{
+      let page2 = await browser.newPage()
 
-    const $1x1Button = '//div[@role="dialog"]//button//' +
-      '*[contains(text(), "1")]//..//..//..'
+      await page2.goto(instagramBaseUrl, {
+        waitUntil: "networkidle2"
+      })
 
-    const $4x5Button = '//div[@role="dialog"]//button//' +
-      '*[contains(text(), "4")]//..//..//..'
+      await sleep(1000)
 
-    const $16x9Button = '//div[@role="dialog"]//button//' +
-      '*[contains(text(), "16")]//..//..//..'
+      const oriButton = '//div[@role="dialog"]//button//' +
+        '*[contains(text(), "riginal")]//..//..//..'
 
-    await safeGoto('https://instagram.com/')
-    await sleep(3000)
+      const $1x1Button = '//div[@role="dialog"]//button//' +
+        '*[contains(text(), "1")]//..//..//..'
 
-    const postButton = await page.$x('//nav//button')
+      const $4x5Button = '//div[@role="dialog"]//button//' +
+        '*[contains(text(), "4")]//..//..//..'
 
-    if (!(postButton.length > 0)) {
-      logger.error('Post Button Not Found')
+      const $16x9Button = '//div[@role="dialog"]//button//' +
+        '*[contains(text(), "16")]//..//..//..'
+
       await sleep(3000)
-      return
-    }
 
-    await postButton[0].click()
-    await sleep(1000)
+      const postButton = await page2.$x('//nav//button')
 
-    const dialogPost = await page.$x('//div[@role="dialog"]')
+      if (!(postButton.length > 0)) {
+        logger.error('Post Button Not Found')
+        await sleep(3000)
+        return
+      }
 
-    if (!(dialogPost.length > 0)) {
-      logger.error('Dialog Not Found')
+      await postButton[0].click()
+      await sleep(1000)
+
+      const dialogPost = await page2.$x('//div[@role="dialog"]')
+
+      if (!(dialogPost.length > 0)) {
+        logger.error('Dialog Not Found')
+        await sleep(3000)
+        return
+      }
+
+      await sleep(2000)
+
+      const [fileChooser] = await Promise.all([
+        page2.waitForFileChooser(),
+        page2.click('div[role=dialog] button')
+      ])
+
+      await fileChooser.accept([`${imagePath}`])
+      await sleep(5000)
+
+      await page2.waitForXPath(
+        '//div[@role="dialog"]//h1[contains(text(), "rop")]'
+      )
+
+      const dialogButton = await page2.$x('//div[@role="dialog"]//button')
+      await dialogButton[2].click()
+
+      await sleep(2000)
+
+      switch(ratio){
+        case 1:
+          {
+           const button = await page2.$x($1x1Button)
+           await button[0].click()
+          }
+          break
+        case 2:
+          {
+           const button = await page2.$x($4x5Button)
+           await button[0].click()
+          }
+          break
+        case 3:
+          {
+           const button = await page2.$x($16x9Button)
+           await button[0].click()
+          }
+          break
+        default:
+          {
+           const button = await page2.$x(oriButton)
+           await button[0].click()
+          }
+      }
+
+      await sleep(1000)
+
+      await dialogButton[2].click()
+
+      await dialogButton[1].click()
+
+      await sleep(1000)
+
+      const nextButton = await page2.$x('//div[@role="dialog"]' +
+        '//button[contains(text(), "ext")]')
+      await nextButton[0].click()
+
       await sleep(3000)
-      return
+
+      const captionArea = await page2.$x('//textarea' +
+        '[contains(@aria-label, "caption")]')
+      await captionArea[0].type(caption, { delay: 70 })
+
+      await sleep(3000)
+
+      const shareButton = await page2.$x('//div[@role="dialog"]' +
+        '//button[contains(text(), "hare")]')
+
+      await shareButton[0].click()
+
+      await page2.waitForXPath(
+        '//div[@role="dialog"]//h2[contains(text(), "shared")]'
+      )
+
+      await sleep(3000)
+
+      await page2.close()
+
+      return 1
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  async function checkSchedule(scheduleData = []){
+    let nextSchedule = await getNextSchedule()
+    let date = new Date()
+
+    if (Object.keys(nextSchedule).length > 0) {
+      let hour_and_minute = nextSchedule.time.split(":")
+
+      console.log(`Waktu Sistem : ${date.getHours()}:${date.getMinutes()}`)
+      console.log(`Waktu Schedule: ${hour_and_minute}`)
+
+      console.log(`isPosted != 1`, nextSchedule.isPosted != 1)
+      console.log(
+        `Pengecekan 1 :`,
+        date.getHours() == parseInt(hour_and_minute[0])
+      )
+      console.log(
+        `Pengecekan 2 :`,
+        date.getMinutes() == parseInt(hour_and_minute[1])
+      )
+      console.log(
+        `Pengecekan 3 :`,
+        (date.getMinutes() - parseInt(hour_and_minute[1])) == 1
+      )
+
+      if (
+        nextSchedule.isPosted != 1 &&
+        date.getHours() == parseInt(hour_and_minute[0]) &&
+        (
+          date.getMinutes() == parseInt(hour_and_minute[1]) ||
+          (date.getMinutes() - parseInt(hour_and_minute[1])) == 1
+        )
+      ) {
+        console.log("=== Process Data ===")
+
+        let processData = await postContent(
+          nextSchedule.content_media[0].content_path,
+          nextSchedule.content_media[0].content_ratio,
+          nextSchedule.content_caption
+        )
+
+        let processedData = {
+            ...nextSchedule,
+            isPosted: 1
+        }
+
+        await changeNextSchedule(processedData)
+
+        if (processData) {
+          return processedData
+        }
+
+        return {
+          ...processedData,
+          isPosted: 0
+        }
+      }
     }
 
-    await sleep(2000)
+    console.log("Test Not Pass")
 
-    const [fileChooser] = await Promise.all([
-      page.waitForFileChooser(),
-      page.click('div[role=dialog] button')
-    ])
+    return await setNextSchedule(scheduleData)
+  }
 
-    await fileChooser.accept([imagePath])
-    await sleep(3000)
+  async function setNextSchedule(scheduleData){
+    // Filter untuk dapat data yang jamnya lebih besar dari sekarang
+    let filteredSchedule = scheduleData.filter(data => {
+      let date = new Date()
+      let hour = data.time.split(":")[0]
 
-    const dialogButton = await page.$x('//div[@role="dialog"]//button')
-    await dialogButton[2].click()
+      return data.isPosted == 0 &&
+        parseInt(hour) >= date.getHours()
+    })
 
-    await sleep(2000)
+    //console.log("Filter Jam")
 
-    switch(ratio){
-      case 1:
-        {
-         const button = await page.$x($1x1Button)
-         await button[0].click()
-        }
-        break
-      case 2:
-        {
-         const button = await page.$x($4x5Button)
-         await button[0].click()
-        }
-        break
-      case 3:
-        {
-         const button = await page.$x($16x9Button)
-         await button[0].click()
-        }
-        break
-      default:
-        {
-         const button = await page.$x(oriButton)
-         await button[0].click()
-        }
+    //console.log(filteredSchedule)
+
+    // Mengurutkan data dari jam yang paling kecil
+    filteredSchedule.sort((a, b) => {
+      let a_time = a.time.split(":")
+      let b_time = b.time.split(":")
+
+      return parseInt(a_time[0]) - parseInt(b_time[0])
+    })
+
+    //console.log("Sorting Jam")
+
+    //console.log(filteredSchedule)
+
+    // Mengeliminasi data yang menitnya sudah terlewat
+    filteredSchedule = filteredSchedule.filter(data => {
+      let date = new Date()
+      let hour_and_minute = data.time.split(":")
+
+      if(parseInt(hour_and_minute[0]) == date.getHours()){
+        return parseInt(hour_and_minute[1]) >= date.getMinutes()
+      }
+
+      return data
+    })
+
+    //console.log("Filter Menit")
+
+    //console.log(filteredSchedule)
+
+    // Mengurutkan data dari menit yang lebih kecil
+    filteredSchedule.sort((a, b) => {
+      let a_time = a.time.split(":")
+      let b_time = b.time.split(":")
+
+      return parseInt(a_time[1]) - parseInt(b_time[1])
+    })
+
+    //console.log("Sorting Menit")
+
+    //console.log(filteredSchedule)
+
+    // Mengurutkan data dari jam yang paling kecil
+    filteredSchedule.sort((a, b) => {
+      let a_time = a.time.split(":")
+      let b_time = b.time.split(":")
+
+      return parseInt(a_time[0]) - parseInt(b_time[0])
+    })
+
+    //console.log("Sorting Jam")
+
+    //console.log(filteredSchedule)
+
+    if(filteredSchedule.length > 0){
+      console.log("Data dirubah")
+      await changeNextSchedule(filteredSchedule[0])
+    }else{
+      console.log("Tidak ada data")
+      return false
     }
-
-    await sleep(1000)
-
-    await dialogButton[2].click()
-
-    await dialogButton[1].click()
-
-    await sleep(1000)
-
-    const nextButton = await page.$x('//div[@role="dialog"]' +
-      '//button[contains(text(), "ext")]')
-    await nextButton[0].click()
-
-    await sleep(3000)
-
-    const captionArea = await page.$x('//textarea' +
-      '[contains(@aria-label, "caption")]')
-    await captionArea[0].type(caption, { delay: 70 })
-
-    await sleep(2000)
-
-    const shareButton = await page.$x('//div[@role="dialog"]' +
-      '//button[contains(text(), "hare")]')
-
-    await shareButton[0].click()
-
   }
   // End Code From Prawira
 
@@ -1214,6 +1377,7 @@ const Instauto = async (db, browser, options) => {
     experimental,
     followUsersFromCSV,
     postContent,
+    checkSchedule,
   };
 };
 
