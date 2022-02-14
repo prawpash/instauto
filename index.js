@@ -889,25 +889,8 @@ const Instauto = async (db, browser, options) => {
 
   // Code From Prawira
   async function experimental(){
-    await navigateToUser('dicoding');
     try {
-      console.log('experimental');
-      await page.exposeFunction('instautoSleep', sleep);
-      await page.exposeFunction('instautoLog', (...args) => console.log(...args));
-      await page.exposeFunction('instautoOnImageLiked', (href) => onImageLiked({ username, href }));
-      await page.exposeFunction('comment', async(...args) => await commentThisContent(...args));
-
-      let dryRun = false;
-      let likeImagesMin = 2;
-      let likeImagesMax = 4;
-      let enableCommentContents = true;
-      let comments = [
-        "🍉🍉🍉",
-        "🍈🍈",
-        "☕"
-      ]
-
-      await page.evaluate(likeCurrentUserImagesPageCode,{ dryRun, likeImagesMin, likeImagesMax, enableCommentContents, comments });
+      console.log("experimental")
     } catch (err) {
       console.log(err);
     }
