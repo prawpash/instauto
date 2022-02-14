@@ -319,10 +319,10 @@ pkg-dir@4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-prawira_instauto@^7.3.6:
-  version "7.3.6"
-  resolved "https://registry.yarnpkg.com/prawira_instauto/-/prawira_instauto-7.3.6.tgz#b1865f1e465a5246f73374810e9188e7a7a74e62"
-  integrity sha512-Mhm/xp+fW/1ZCFhaaX7NUQL15MOHQVGpdT0GaUPADCIKFX9Xmdr16/QqjSygvTaRFUeBO+Sbr3GjQnnO38LXbg==
+prawira_instauto@^7.5.0:
+  version "7.5.0"
+  resolved "https://registry.yarnpkg.com/prawira_instauto/-/prawira_instauto-7.5.0.tgz#6bb20c092af7f609e65078e283e108706fa83856"
+  integrity sha512-M+G5PL5CszFMwRDP+jqMHEp6ETOpgYC6FwRIODFdgzV95fd7HVa1+2hzvdBtMwdQbV+xpq8L7x4wSrf8Qtbi+Q==
   dependencies:
     fs-extra "^5.0.0"
     lodash "^4.17.10"
