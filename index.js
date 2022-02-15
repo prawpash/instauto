@@ -20,11 +20,37 @@ const commentsData = '/media/comments.csv'
 // Development
 //const commentsData = './comments.csv'
 
+// Production
+const nextSchedulePath = '/media/nextSchedule.json'
+// Development
+//const nextSchedulePath = './nextSchedule.json'
+
+// Production
+const scheduleDataPath = '/media/scheduleData.csv'
+// Development
+//const scheduleDataPath = './scheduleData.csv'
+
+
 const puppeteer = require('puppeteer')
 const Instauto = require('prawira_instauto')
 
 const fs = require('fs')
 const csv = require('csv-parser')
+
+const setIntervalAsync = (fn, ms) => {
+  fn().then((resp) => {
+    if(resp == "stop"){
+      return
+    } else {
+      setTimeout(() => setIntervalAsync(fn, ms), ms)
+    }
+  })
+}
+
+var isScheduleDone = false
+var isCommonDone = false
+
+let scheduleData = []
 
 const option = {
   cookiesPath: './cookies.json',
@@ -76,6 +102,38 @@ const option = {
       console.log(`>>> ${chunk}`)
     }
 
+    const scheduleReadStream = fs.createReadStream(scheduleDataPath)
+      .pipe(csv())
+      .on('data', (row) => {
+        scheduleData.push({
+          "schedule_name": "Post Content",
+          "time": `${row.time}`,
+          "content_media": [
+            {
+              //"content_path": `${row.path}`,
+              "content_path": `/media/${row.path}`,
+              "content_ratio": `${row.ratio}`
+            }
+          ],
+          "content_caption": `${row.caption}`,
+          "isPosted": 0
+        })
+      })
+      .on('end', () => {
+        console.log("Get Data Schedule Done")
+      })
+
+    for await (const chunk of scheduleReadStream) {
+      console.log(`>>> ${chunk}`)
+    }
+
+    scheduleData = scheduleData.map((ele, index) => {
+      return {
+        "id": index + 1,
+        ...ele
+      }
+    })
+
     if (config.followUsersDirectlyFromCSV) {
       const userReadStream = fs.createReadStream(userNeedToFollowsPath)
         .pipe(csv())
@@ -105,10 +163,36 @@ const option = {
     const instautoDB = await Instauto.JSONDB({
       followedDbPath: './followed.json',
       unfollowedDbPath: './unfollowed.json',
-      likedPhotosDbPath: './liked-photos.json'
+      likedPhotosDbPath: './liked-photos.json',
+      taskScheduleDbPath: nextSchedulePath
     })
 
     const instauto = await Instauto(instautoDB, browser, option)
+
+    if(scheduleData.length > 0) {
+      setIntervalAsync(async () => {
+        let check = await instauto.checkSchedule(scheduleData)
+        console.log("Data", check)
+
+        scheduleData = scheduleData.map(data => {
+          if(data.id == check?.id) {
+            return {
+              ...data,
+              isPosted: check.isPosted
+            }
+          }
+
+          return data
+        })
+
+        if (check === false) {
+          console.log("No Schedule Found")
+          isScheduleDone = true
+          if (isCommonDone) await browser.close()
+          return "stop"
+        }
+      }, 1000 * 60)
+    }
 
     const unfollowedCount = await instauto.unfollowOldFollowed({
       ageInDays: config.ageInDays,
@@ -146,7 +230,8 @@ const option = {
   } catch (err) {
     console.log(err)
   } finally {
+    isCommonDone = true
     console.log('Closing Browser')
-    if (browser) await browser.close()
+    if (browser && isScheduleDone) await browser.close()
   }
 })()
